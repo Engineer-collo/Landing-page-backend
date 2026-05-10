@@ -1,15 +1,15 @@
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_migrate import Migrate, upgrade
+from flask_migrate import Migrate
+from flask_migrate import upgrade
+
 
 from config import Config
 from models import db, Registration, MeetingLink
 
-# =========================
-# APP INIT
-# =========================
 app = Flask(__name__)
+
 app.config.from_object(Config)
 
 CORS(app)
@@ -18,17 +18,6 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 print("DATABASE_URL:", os.getenv("DATABASE_URL"))
-
-
-# =========================
-# AUTO MIGRATION (RENDER SAFE)
-# =========================
-with app.app_context():
-    try:
-        upgrade()
-        print("✅ Database migrated successfully")
-    except Exception as e:
-        print("⚠️ Migration error:", e)
 
 
 # =========================
@@ -109,11 +98,11 @@ def delete_registration(id):
     return jsonify({"message": "Deleted successfully"}), 200
 
 
-# =====================================================
-# 🎥 MEETING LINK ROUTES
-# =====================================================
+# ==========================================================
+# 🟢 MEETING LINK ROUTES
+# ==========================================================
 
-# CREATE MEETING LINK
+# CREATE LINK
 @app.route("/meeting-links", methods=["POST"])
 def create_meeting_link():
 
@@ -127,8 +116,8 @@ def create_meeting_link():
         return jsonify({"error": "URL is required"}), 400
 
     try:
-        # deactivate previous active links
-        MeetingLink.query.filter_by(is_active=True).update({"is_active": False})
+        # deactivate previous links
+        MeetingLink.query.update({MeetingLink.is_active: False})
 
         new_link = MeetingLink(
             title=title,
@@ -150,7 +139,7 @@ def create_meeting_link():
         return jsonify({"error": str(e)}), 500
 
 
-# GET ALL MEETING LINKS
+# GET ALL LINKS
 @app.route("/meeting-links", methods=["GET"])
 def get_meeting_links():
 
@@ -161,7 +150,7 @@ def get_meeting_links():
     ]), 200
 
 
-# GET ACTIVE MEETING LINK (FOR FRONTEND)
+# GET ACTIVE LINK
 @app.route("/meeting-links/active", methods=["GET"])
 def get_active_meeting_link():
 
@@ -173,7 +162,7 @@ def get_active_meeting_link():
     return jsonify(link.to_dict()), 200
 
 
-# UPDATE MEETING LINK
+# UPDATE LINK
 @app.route("/meeting-links/<int:id>", methods=["PUT"])
 def update_meeting_link(id):
 
@@ -209,7 +198,7 @@ def update_meeting_link(id):
         return jsonify({"error": str(e)}), 500
 
 
-# DELETE MEETING LINK
+# DELETE LINK
 @app.route("/meeting-links/<int:id>", methods=["DELETE"])
 def delete_meeting_link(id):
 
