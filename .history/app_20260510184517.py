@@ -90,18 +90,7 @@ def get_registrations():
         for registration in registrations
     ]), 200
 
-@app.route("/registrations/<int:id>", methods=["DELETE"])
-def delete_registration(id):
 
-    reg = Registration.query.get(id)
-
-    if not reg:
-        return jsonify({"error": "Not found"}), 404
-
-    db.session.delete(reg)
-    db.session.commit()
-
-    return jsonify({"message": "Deleted successfully"})
 
 
 if __name__ == "__main__":
